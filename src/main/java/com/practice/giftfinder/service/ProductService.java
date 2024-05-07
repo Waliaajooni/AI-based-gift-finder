@@ -59,20 +59,19 @@ public class ProductService {
     @Autowired
     private Gpt3Service gptService;
 
-    public Product addProduct(Long userId, String name, String color, String categoryName, Integer price) {
+    public Product addProduct(Long userId, ProductDto productDto) {
         if (!userService.isUserAdmin(userId)) return null;
 
-        String prompt = "describe " + color + " color "  + name + " in two lines";
+        String prompt = "describe " + productDto.getColor().name() + " color "  + productDto.getName() + " in two lines";
         GptResponse chatGptResponse = gptService.getGPTResponseForPrompt(prompt);
         String description = chatGptResponse.getChoices().get(0).getMessage().getContent();
 
-        //String description = "cba";
         Product product = new Product();
-        product.setName(name);
-        product.setColor(ColorEnum.valueOf(color));
+        product.setName(productDto.getName());
+        product.setColor(productDto.getColor());
         product.setDescription(description);
-        product.setRelevantCategory(CategoryEnum.valueOf(categoryName));
-        product.setPrice(price);
+        product.setRelevantCategory(productDto.getRelevantCategory());
+        product.setPrice(productDto.getPrice());
 
         return productRepository.save(product);
     }

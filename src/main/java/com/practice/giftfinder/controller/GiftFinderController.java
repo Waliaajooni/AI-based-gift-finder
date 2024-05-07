@@ -16,20 +16,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/finder")
+@RequestMapping("/api")
 public class GiftFinderController {
-
-    /*
-    @Value("${openai.model}")
-    private String model;
-
-    @Value(("${openai.api.url}"))
-    private String apiURL;
-
-    @Autowired
-    private RestTemplate template;
-
-     */
 
     @Autowired
     private ProductService productService;
@@ -37,31 +25,31 @@ public class GiftFinderController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/{userId}/add-product")
-    public ResponseEntity<Product> addProduct(@PathVariable Long userId, @RequestParam String productName, @RequestParam String color, @RequestParam String category, @RequestParam Integer price) {
-        Product product = productService.addProduct(userId, productName, color, category, price);
+    @PostMapping("/products")
+    public ResponseEntity<Product> addProduct(@RequestParam Long userId, @RequestBody ProductDto productDto) {
+        Product product = productService.addProduct(userId, productDto);
         if (product == null) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(product);
     }
 
-    @PostMapping("/create-user")
+    @PostMapping("/users")
     public ResponseEntity<User> createUser(@RequestParam String userName, @RequestParam Boolean isAdmin) {
         return ResponseEntity.ok(userService.createUser(userName, isAdmin));
     }
 
-    @GetMapping("/predict-products/{userId}")
+    @GetMapping("/predictions/users/{userId}")
     public ResponseEntity<List<ProductDto>> predictProducts(@PathVariable Long userId) {
         return ResponseEntity.ok(productService.predictResults(userId));
     }
 
-    @GetMapping("/{userId}/search")
-    public ResponseEntity<List<ProductDto>> getSearchResults(@PathVariable Long userId, @RequestParam String searchPhrase) {
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDto>> getSearchResults(@RequestParam Long userId, @RequestParam String searchPhrase) {
         return ResponseEntity.ok(productService.search(userId, searchPhrase));
     }
 
-    @GetMapping("/{userId}/get-recommendations")
+    @GetMapping("/recommendations")
     public ResponseEntity<List<ProductDto>> getRecommendations(@RequestBody UserInputDto userInput) {
         List<ProductDto> products  = productService.getRecommendedProductsBasedOnInterests(userInput);
         return ResponseEntity.ok(products);
